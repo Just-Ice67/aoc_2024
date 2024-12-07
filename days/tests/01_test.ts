@@ -9,7 +9,7 @@ Deno.test(function day01Test() {
         1   3
         3   9
         3   3
-    `
+    `;
 
     const [a, b] = parseInput(input);
 
