@@ -1,6 +1,21 @@
 import { assertEquals } from "@std/assert";
-import { add } from "../01.ts";
+import { parseInput, listDistance, listSimilarity } from "../01.ts";
 
-Deno.test(function addTest() {
-    assertEquals(add(2, 3), 5);
+Deno.test(function day01Test() {
+    const input = `
+        3   4
+        4   3
+        2   5
+        1   3
+        3   9
+        3   3
+    `
+
+    const [a, b] = parseInput(input);
+
+    assertEquals(a, [3, 4, 2, 1, 3, 3]);
+    assertEquals(b, [4, 3, 5, 3, 9, 3]);
+
+    assertEquals(listDistance(a, b), 11);
+    assertEquals(listSimilarity(a, b), 31);
 });
