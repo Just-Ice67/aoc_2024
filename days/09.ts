@@ -3,8 +3,8 @@ export type Blocks = string[];
 export function parseInput(input: string): Blocks {
     return input.trim().split("").flatMap(
         (char, i) => {
-            if (i % 2 === 1) return ".".repeat(parseInt(char)).split("");
-            else return `${i / 2} `.repeat(parseInt(char)).trim().split(" ");
+            if (i % 2 === 1) return ".".repeat(+char).split("");
+            else return `${i / 2} `.repeat(+char).trim().split(" ");
         }
     );
 }
@@ -28,7 +28,7 @@ export function calculateChecksum(blocks: Blocks): number {
     return blocks.reduce(
         (acc, block, i) => {
             if (block === ".") return acc;
-            else return acc += i * parseInt(block);
+            else return acc += i * +block;
         }, 0
     );
 }

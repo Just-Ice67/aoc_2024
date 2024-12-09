@@ -14,7 +14,7 @@ export function parseInput(input: string): CalibrationEquations {
     for (const line of input.trim().split("\n")) {
         const [target, values] = line.trim().split(": ");
 
-        equations.push([parseInt(target), values.split(" ").map((num) => parseInt(num))]);
+        equations.push([+target, values.split(" ").map((num) => +num)]);
     }
 
     return equations;
@@ -27,7 +27,7 @@ export function handleOperation(a: number, b: number, op: Operator): number {
         case "*":
             return a * b;
         case "||":
-            return parseInt(`${a}${b}`);
+            return +`${a}${b}`;
     }
 }
 

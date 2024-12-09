@@ -7,14 +7,14 @@ export type Rules = {
 
 export function parseInput(input: string): [Updates, Rules] {
     function parseUpdates(input: string): Updates {
-        return input.trim().split("\n").map((line) => line.trim().split(",").map((num) => parseInt(num)));
+        return input.trim().split("\n").map((line) => line.trim().split(",").map((num) => +num));
     }
     
     function parseRules(input: string): Rules {
         const rules = {} as Rules;
     
         for (const line of input.trim().split("\n")) {
-            const [num_1, num_2] = line.trim().split("|").map((num) => parseInt(num));
+            const [num_1, num_2] = line.trim().split("|").map((num) => +num);
     
             if (rules[num_1]) rules[num_1].push(num_2);
             else rules[num_1] = [num_2];

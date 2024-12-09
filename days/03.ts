@@ -11,12 +11,7 @@ export function parseInput(input: string): [number, number][] {
         const comma = input.indexOf(",", i);
         if (comma === -1) break;
 
-        let num_1_nan = false;
-        for (let j = i; j < comma; j++) {
-            if (input[j] < "0" || input[j] > "9") num_1_nan = true;
-        }
-
-        const num_1 = num_1_nan ? NaN : parseInt(input.slice(i, comma));
+        const num_1 = +input.slice(i, comma);
         if (isNaN(num_1) || num_1 > 999 || num_1 < 0) continue;
 
         i = comma + 1;
@@ -24,12 +19,7 @@ export function parseInput(input: string): [number, number][] {
         const close = input.indexOf(")", i);
         if (close === -1) break;
 
-        let num_2_nan = false;
-        for (let j = i; j < close; j++) {
-            if (input[j] < "0" || input[j] > "9") num_2_nan = true;
-        }
-
-        const num_2 = num_2_nan ? NaN : parseInt(input.slice(i, close));
+        const num_2 = +input.slice(i, close);
         if (isNaN(num_2) || num_2 > 999 || num_2 < 0) continue;
 
         instructions.push([num_1, num_2]);
@@ -74,12 +64,7 @@ export function parseInput2(input: string): [number, number][] {
         const comma = input.indexOf(",", i);
         if (comma === -1) break;
 
-        let num_1_nan = false;
-        for (let j = i; j < comma; j++) {
-            if (input[j] < "0" || input[j] > "9") num_1_nan = true;
-        }
-
-        const num_1 = num_1_nan ? NaN : parseInt(input.slice(i, comma));
+        const num_1 = +input.slice(i, comma);
         if (isNaN(num_1) || num_1 > 999 || num_1 < 0) continue;
 
         i = comma + 1;
@@ -87,12 +72,7 @@ export function parseInput2(input: string): [number, number][] {
         const close = input.indexOf(")", i);
         if (close === -1) break;
 
-        let num_2_nan = false;
-        for (let j = i; j < close; j++) {
-            if (input[j] < "0" || input[j] > "9") num_2_nan = true;
-        }
-
-        const num_2 = num_2_nan ? NaN : parseInt(input.slice(i, close));
+        const num_2 = +input.slice(i, close);
         if (isNaN(num_2) || num_2 > 999 || num_2 < 0) continue;
 
         instructions.push([num_1, num_2]);

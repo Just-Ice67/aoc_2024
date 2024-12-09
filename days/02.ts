@@ -1,7 +1,7 @@
 export function parseInput(input: string): number[][] {
     return input.trim().split("\n").map(
         (line) => line.trim().split(" ").map(
-            (num) => parseInt(num)
+            (num) => +num
         )
     );
 }

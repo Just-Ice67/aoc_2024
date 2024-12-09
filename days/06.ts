@@ -60,7 +60,7 @@ export function getPath(map: Map): [Path, boolean] {
 
 export function removePathDuplicates(path: Path): Path {
     const unique = new Set(path.map((pos) => pos.join(",")))
-    return Array.from(unique).map((pos) => pos.split(",").map((num) => parseInt(num))) as Path;
+    return Array.from(unique).map((pos) => pos.split(",").map((num) => +num)) as Path;
 }
 
 export function countUniquePathPositions(path: Path): number {
