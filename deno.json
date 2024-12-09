@@ -5,9 +5,11 @@
     "day_03": "deno run --allow-read=./days/inputs/03.txt ./days/03.ts",
     "day_04": "deno run --allow-read=./days/inputs/04.txt ./days/04.ts",
     "day_05": "deno run --allow-read=./days/inputs/05.txt ./days/05.ts",
-    "day_06": "deno run --allow-read=./days/inputs/06.txt ./days/06.ts"
+    "day_06": "deno run --allow-read=./days/inputs/06.txt ./days/06.ts",
+    "day_07": "deno run --allow-read=./days/inputs/07.txt ./days/07.ts"
   },
   "imports": {
-    "@std/assert": "jsr:@std/assert@^1.0.9"
+    "@std/assert": "jsr:@std/assert@^1.0.9",
+    "js-combinatorics": "npm:js-combinatorics@^2.1.2"
   }
 }
