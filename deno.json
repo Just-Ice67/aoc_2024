@@ -6,7 +6,8 @@
     "day_04": "deno run --allow-read=./days/inputs/04.txt ./days/04.ts",
     "day_05": "deno run --allow-read=./days/inputs/05.txt ./days/05.ts",
     "day_06": "deno run --allow-read=./days/inputs/06.txt ./days/06.ts",
-    "day_07": "deno run --allow-read=./days/inputs/07.txt ./days/07.ts"
+    "day_07": "deno run --allow-read=./days/inputs/07.txt ./days/07.ts",
+    "day_08": "deno run --allow-read=./days/inputs/08.txt ./days/08.ts"
   },
   "imports": {
     "@std/assert": "jsr:@std/assert@^1.0.9",
