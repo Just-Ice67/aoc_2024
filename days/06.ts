@@ -26,7 +26,7 @@ export function getPath(map: Map): [Path, boolean] {
     let [x, y] = findStart(map);
     
     const path = [[x, y]] as Path;
-    const walls = {} as { [key: string]: [number, number] };
+    const walls = {} as { [pos: string]: [number, number] };
     let looping = false;
 
     while (true) {
@@ -40,8 +40,7 @@ export function getPath(map: Map): [Path, boolean] {
             if (key in walls && walls[key][0] === dir[0] && walls[key][1] === dir[1]) {
                 looping = true;
                 break;
-            }
-            else walls[key] = dir;
+            } else walls[key] = dir;
 
             if (dir[0] === 0 && dir[1] === -1) dir = [1, 0];
             else if (dir[0] === 1 && dir[1] === 0) dir = [0, 1];

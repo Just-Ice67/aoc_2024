@@ -10,17 +10,20 @@ export function findWord(wordSearch: string[], word: string): number {
 
     for (let y = 0; y < wordSearch.length; y++) {
         for (let x = 0; x < wordSearch[y].length; x++) {
-            if (wordSearch[y][x] === word[0]) {
-                for (const direction of directions) {
-                    const maxX = x + (direction[0] * (word.length - 1));
-                    const maxY = y + (direction[1] * (word.length - 1));
+            if (wordSearch[y][x] !== word[0]) continue;
 
-                    if (maxX < 0 || maxX >= wordSearch[y].length || maxY < 0 || maxY >= wordSearch.length) continue;
+            for (const direction of directions) {
+                const maxX = x + (direction[0] * (word.length - 1));
+                const maxY = y + (direction[1] * (word.length - 1));
 
-                    for (let i = 1; i < word.length; i++) {
-                        if (wordSearch[y + (direction[1] * i)][x + (direction[0] * i)] !== word[i]) break;
-                        if (i === word.length - 1) found++;
-                    }
+                if (maxX < 0 || maxX >= wordSearch[y].length || maxY < 0 || maxY >= wordSearch.length) continue;
+
+                for (let i = 1; i < word.length; i++) {
+                    const currX = x + (direction[0] * i);
+                    const currY = y + (direction[1] * i);
+
+                    if (wordSearch[currY][currX] !== word[i]) break;
+                    if (i === word.length - 1) found++;
                 }
             }
         }
