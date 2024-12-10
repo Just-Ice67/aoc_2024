@@ -13,12 +13,11 @@ export function getAntennaMap(map: Map): FrequencyMap {
 
     for (let y = 0; y < map.length; y++) {
         for (let x = 0; x < map[y].length; x++) {
-            const mapChar = map[y][x];
+            const frequency = map[y][x];
 
-            if (mapChar === EMPTY) continue;
+            if (frequency === EMPTY) continue;
 
-            if (antennaMap[mapChar]) antennaMap[mapChar].push([x, y]);
-            else antennaMap[mapChar] = [[x, y]];
+            frequency in antennaMap ? antennaMap[frequency].push([x, y]) : antennaMap[frequency] = [[x, y]];
         }
     }
 
@@ -43,8 +42,7 @@ export function getAntinodeMap(map: Map, resonantHarmonics: boolean): FrequencyM
                     let y = pos1[1] + rise;
 
                     while(y >= 0 && y < map.length && x >= 0 && x < map[y].length) {
-                        if (antinodeMap[frequency]) antinodeMap[frequency].push([x, y]);
-                        else antinodeMap[frequency] = [[x, y]];
+                        frequency in antinodeMap ? antinodeMap[frequency].push([x, y]) : antinodeMap[frequency] = [[x, y]];
 
                         x += run;
                         y += rise;
@@ -59,8 +57,7 @@ export function getAntinodeMap(map: Map, resonantHarmonics: boolean): FrequencyM
                     
                     if (y < 0 || y >= map.length || x < 0 || x >= map[y].length) continue;
                     
-                    if (antinodeMap[frequency]) antinodeMap[frequency].push([x, y]);
-                    else antinodeMap[frequency] = [[x, y]];
+                    frequency in antinodeMap ? antinodeMap[frequency].push([x, y]) : antinodeMap[frequency] = [[x, y]];
                 }
             }
         }

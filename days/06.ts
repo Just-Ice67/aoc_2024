@@ -37,7 +37,7 @@ export function getPath(map: Map): [Path, boolean] {
         if (map[nextY][nextX] === WALL) {
             const key = `${nextX},${nextY}`;
 
-            if (walls[key] && walls[key][0] === dir[0] && walls[key][1] === dir[1]) {
+            if (key in walls && walls[key][0] === dir[0] && walls[key][1] === dir[1]) {
                 looping = true;
                 break;
             }

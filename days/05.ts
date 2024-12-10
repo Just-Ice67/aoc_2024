@@ -16,8 +16,7 @@ export function parseInput(input: string): [Updates, Rules] {
         for (const line of input.trim().split("\n")) {
             const [num_1, num_2] = line.trim().split("|").map((num) => +num);
     
-            if (rules[num_1]) rules[num_1].push(num_2);
-            else rules[num_1] = [num_2];
+            num_1 in rules ? rules[num_1].push(num_2) : rules[num_1] = [num_2];
         }
     
         return rules;
@@ -59,7 +58,7 @@ export function invalidUpdates(updates: Updates, rules: Rules): Updates {
 
 export function sortInvalidUpdate(update: Update, rules: Rules): Update {
     return update.sort((a, b) => {
-        if (rules[a] && rules[a].includes(b)) return -1;
+        if (a in rules && rules[a].includes(b)) return -1;
         else if (a === b) return 0;
         else return 1;
     });
