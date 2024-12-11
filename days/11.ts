@@ -1,22 +1,3 @@
-// deno-lint-ignore no-explicit-any
-export function cache(fn: (...args: any[]) => any): (...args: any[]) => any {
-    const cache = new Map();
-    
-    // deno-lint-ignore no-explicit-any
-    return function(this: any) {
-        const hash = [].join.call(arguments);
-
-        if (cache.has(hash)) {
-            return cache.get(hash);
-        } else {
-            const res = fn.apply(this, Array.from(arguments));
-            cache.set(hash, res);
-
-            return res;
-        }
-    }
-}
-
 export class PlutonianPebbles {
     constructor(...pebbles: number[]) {
         this.pebbles = pebbles;
@@ -27,31 +8,48 @@ export class PlutonianPebbles {
     }
     
     blink(n: number): number {
+        function inner(pebble: number, n: number): number {
+            const cacheKey = `${pebble},${n}`;
+
+            if (PlutonianPebbles.cache.has(cacheKey)) {
+                return PlutonianPebbles.cache.get(cacheKey)!;
+            }
+
+            let res;
+
+            if (n === 0) {
+                res = 1;
+            } else if (pebble === 0) {
+                res = inner(1, n - 1);
+            } else {
+                const pebbleStr = pebble.toString();
+                const pebbleStrLen = pebbleStr.length;
+                
+                if (pebbleStrLen % 2 === 0) {
+                    const left = +pebbleStr.slice(0, pebbleStrLen / 2);
+                    const right = +pebbleStr.slice(pebbleStrLen / 2, pebbleStrLen);
+                    
+                    res = inner(left, n - 1) + inner(right, n - 1);
+                } else {
+                    res = inner(pebble * 2024, n - 1);
+                }
+            }
+
+            PlutonianPebbles.cache.set(cacheKey, res);
+
+            return res;
+        }
+
         let count = 0;
 
         for (const pebble of this.pebbles) {
-            count += PlutonianPebbles.blinkPebble(pebble, n);
+            count += inner(pebble, n);
         }
 
         return count;
     }
     
-    private static blinkPebble: (pebble: number, n: number) => number = cache(function(pebble: number, n: number): number {
-        if (n === 0) return 1;
-
-        if (pebble === 0) return PlutonianPebbles.blinkPebble(1, n - 1);
-
-        const pebbleStr = pebble.toString();
-        const pebbleStrLen = pebbleStr.length;
-
-        if (pebbleStrLen % 2 === 0) {
-            const left = +pebbleStr.slice(0, pebbleStrLen / 2);
-            const right = +pebbleStr.slice(pebbleStrLen / 2, pebbleStrLen);
-
-            return PlutonianPebbles.blinkPebble(left, n - 1) + PlutonianPebbles.blinkPebble(right, n - 1);
-        } else return PlutonianPebbles.blinkPebble(pebble * 2024, n - 1);
-    });
-    
+    private static cache: Map<string, number> = new Map();
     private pebbles: number[];
 }
 
