@@ -1,13 +1,16 @@
 export const DIRECTIONS = [[-1, 0], [1, 0], [0, -1], [0, 1]] as [number, number][];
 
-export const REGION_EMPTY = ".";
-export const REGION_MARKER = "X";
-
 export class Region {
-    plots: string[][]
+    static readonly EMPTY_PLOT = "";
+
+    plant: string;
+    plots: string[][];
     
-    constructor(...plots: string[][]) {
-        this.plots = plots;
+    constructor(plant: string, ...plots: [number, number][]) {
+        this.plant = plant;
+        this.plots = [];
+
+        for (const [x, y] of plots) this.addPlot(x, y);
     }
 
     addPlot(x: number, y: number) {
@@ -15,13 +18,13 @@ export class Region {
 
         while (y >= this.plots.length) this.plots.push([]);
         
-        while (x >= this.plots[y].length) this.plots[y].push(REGION_EMPTY);
+        while (x >= this.plots[y].length) this.plots[y].push(Region.EMPTY_PLOT);
         
-        this.plots[y][x] = REGION_MARKER;
+        this.plots[y][x] = this.plant;
     }
 
     area(): number {
-        return this.plots.reduce((area, row) => area + row.filter((plot) => plot === REGION_MARKER).length, 0);
+        return this.plots.reduce((area, row) => area + row.filter((plot) => plot === this.plant).length, 0);
     }
 
     perimeter(): number {
@@ -29,7 +32,7 @@ export class Region {
 
         for (let y = 0; y < this.plots.length; y++) {
             for (let x = 0; x < this.plots[y].length; x++) {
-                if (this.plots[y][x] !== REGION_MARKER) continue;
+                if (this.plots[y][x] !== this.plant) continue;
 
                 perimeter += 4;
 
@@ -39,7 +42,7 @@ export class Region {
 
                     if (nextY < 0 || nextY >= this.plots.length || nextX < 0 || nextX >= this.plots[nextY].length) continue;
 
-                    if (this.plots[nextY][nextX] === REGION_MARKER) perimeter--;
+                    if (this.plots[nextY][nextX] === this.plant) perimeter--;
                 }
             }
         }
@@ -66,19 +69,19 @@ export class Region {
             for (let x = 0; x < this.plots[y].length; x++) {
                 if (x > maxX) maxX = x;
 
-                if (this.plots[y][x] === REGION_EMPTY) {
+                if (this.plots[y][x] === Region.EMPTY_PLOT) {
                     lastTopSide = false;
                     lastBottomSide = false;
 
                     continue;
                 }
 
-                const topSide = y === 0 ? true : x >= this.plots[y - 1].length ? true : this.plots[y - 1][x] === REGION_EMPTY;
+                const topSide = y === 0 ? true : x >= this.plots[y - 1].length ? true : this.plots[y - 1][x] === Region.EMPTY_PLOT;
 
                 if (!lastTopSide && topSide) sides++;
                 lastTopSide = topSide;
 
-                const bottomSide = y === this.plots.length - 1 ? true : x >= this.plots[y + 1].length ? true : this.plots[y + 1][x] === REGION_EMPTY;
+                const bottomSide = y === this.plots.length - 1 ? true : x >= this.plots[y + 1].length ? true : this.plots[y + 1][x] === Region.EMPTY_PLOT;
 
                 if (!lastBottomSide && bottomSide) sides++;
                 lastBottomSide = bottomSide;
@@ -94,19 +97,19 @@ export class Region {
 
         for (let x = 0; x <= maxX; x++) {
             for (let y = 0; y < this.plots.length; y++) {
-                if (x >= this.plots[y].length || this.plots[y][x] === REGION_EMPTY) {
+                if (x >= this.plots[y].length || this.plots[y][x] === Region.EMPTY_PLOT) {
                     lastLeftSide = false;
                     lastRightSide = false;
 
                     continue;
                 }
 
-                const leftSide = x === 0 ? true : this.plots[y][x - 1] === REGION_EMPTY;
+                const leftSide = x === 0 ? true : this.plots[y][x - 1] === Region.EMPTY_PLOT;
 
                 if (!lastLeftSide && leftSide) sides++;
                 lastLeftSide = leftSide;
 
-                const rightSide = x === this.plots[y].length - 1 ? true : this.plots[y][x + 1] === REGION_EMPTY;
+                const rightSide = x === this.plots[y].length - 1 ? true : this.plots[y][x + 1] === Region.EMPTY_PLOT;
 
                 if (!lastRightSide && rightSide) sides++;
                 lastRightSide = rightSide;
@@ -144,7 +147,7 @@ export class Garden {
         const visited: Set<string> = new Set();
 
         const scanRegion = (x: number, y: number): Region => {
-            const region = new Region();
+            const region = new Region(plots[y][x]);
 
             const scanPlot = (x: number, y: number) => {
                 region.addPlot(x, y);
