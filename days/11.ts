@@ -1,6 +1,6 @@
 export class PlutonianPebbles {
     constructor(...pebbles: number[]) {
-        this.pebbles = pebbles;
+        this._pebbles = pebbles;
     }
 
     static fromInput(input: string): PlutonianPebbles {
@@ -11,8 +11,8 @@ export class PlutonianPebbles {
         function inner(pebble: number, n: number): number {
             const cacheKey = `${pebble},${n}`;
 
-            if (PlutonianPebbles.cache.has(cacheKey)) {
-                return PlutonianPebbles.cache.get(cacheKey)!;
+            if (PlutonianPebbles._cache.has(cacheKey)) {
+                return PlutonianPebbles._cache.get(cacheKey)!;
             }
 
             let res;
@@ -35,22 +35,22 @@ export class PlutonianPebbles {
                 }
             }
 
-            PlutonianPebbles.cache.set(cacheKey, res);
+            PlutonianPebbles._cache.set(cacheKey, res);
 
             return res;
         }
 
         let count = 0;
 
-        for (const pebble of this.pebbles) {
+        for (const pebble of this._pebbles) {
             count += inner(pebble, n);
         }
 
         return count;
     }
     
-    private static cache: Map<string, number> = new Map();
-    private pebbles: number[];
+    private static _cache: Map<string, number> = new Map();
+    private _pebbles: number[];
 }
 
 if (import.meta.main) {
