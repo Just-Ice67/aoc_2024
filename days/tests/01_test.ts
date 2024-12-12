@@ -11,11 +11,11 @@ Deno.test(function day01Test() {
         3   3
     `;
 
-    const [a, b] = parseInput(input);
+    const [left, right] = parseInput(input);
 
-    assertEquals(a, [3, 4, 2, 1, 3, 3]);
-    assertEquals(b, [4, 3, 5, 3, 9, 3]);
+    assertEquals(left, [3, 4, 2, 1, 3, 3]);
+    assertEquals(right, [4, 3, 5, 3, 9, 3]);
 
-    assertEquals(listDistance(a, b), 11);
-    assertEquals(listSimilarity(a, b), 31);
+    assertEquals(listDistance(left, right), 11);
+    assertEquals(listSimilarity(left, right), 31);
 });

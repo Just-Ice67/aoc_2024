@@ -15,30 +15,32 @@ export function parseInput(input: string): [number[], number[]] {
     return res;
 }
 
-export function listDistance(a: number[], b: number[]): number {
-    a = a.toSorted();
-    b = b.toSorted();
+export function listDistance(left: number[], right: number[]): number {
+    left = left.toSorted();
+    right = right.toSorted();
 
     let dist = 0;
 
-    for (let i = 0; i < a.length; i++) {
-        dist += Math.abs(a[i] - b[i]);
+    for (let i = 0; i < left.length; i++) {
+        dist += Math.abs(left[i] - right[i]);
     }
 
     return dist;
 }
 
-export function listSimilarity(a: number[], b: number[]): number {
-    const b_counts = {} as { [key: number]: number };
+export function listSimilarity(left: number[], right: number[]): number {
+    const rightCounts: Map<number, number> = new Map();
 
-    for (const num of b) {
-        b_counts[num] = b_counts[num] ? b_counts[num] + 1 : 1;
+    for (const num of right) {
+        const count = rightCounts.has(num) ? rightCounts.get(num)! + 1 : 1;
+
+        rightCounts.set(num, count);
     }
 
     let similarity = 0;
 
-    for (const num of a) {
-        similarity += num * (b_counts[num] ? b_counts[num] : 0);
+    for (const num of left) {
+        if (rightCounts.has(num)) similarity += num * rightCounts.get(num)!;
     }
 
     return similarity;
