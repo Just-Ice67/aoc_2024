@@ -1,7 +1,7 @@
-export function parseInput(input: string): [number, number][] {
-    const instructions = [] as [number, number][];
-    let i = 0;
+export function evalInput1(input: string): number {
+    let sum = 0;
 
+    let i = 0;
     while (true) {
         i = input.indexOf("mul(", i);
         if (i === -1) break;
@@ -11,40 +11,29 @@ export function parseInput(input: string): [number, number][] {
         const comma = input.indexOf(",", i);
         if (comma === -1) break;
 
-        const num_1 = +input.slice(i, comma);
-        if (isNaN(num_1) || num_1 > 999 || num_1 < 0) continue;
+        const num1 = +input.slice(i, comma);
+        if (isNaN(num1) || num1 > 999 || num1 < 0) continue;
 
         i = comma + 1;
 
         const close = input.indexOf(")", i);
         if (close === -1) break;
 
-        const num_2 = +input.slice(i, close);
-        if (isNaN(num_2) || num_2 > 999 || num_2 < 0) continue;
+        const num2 = +input.slice(i, close);
+        if (isNaN(num2) || num2 > 999 || num2 < 0) continue;
 
-        instructions.push([num_1, num_2]);
+        sum += num1 * num2;
 
         i = close + 1;
-    }
-
-    return instructions;
-}
-
-export function performInstructions(instructions: [number, number][]): number {
-    let sum = 0;
-
-    for (const [num_1, num_2] of instructions) {
-        sum += num_1 * num_2;
     }
 
     return sum;
 }
 
-export function parseInput2(input: string): [number, number][] {
-    const instructions = [] as [number, number][];
+export function evalInput2(input: string): number {
+    let sum = 0;
 
     let i = 0;
-
     let next_dont = input.indexOf("don't()");
 
     while (true) {
@@ -64,31 +53,28 @@ export function parseInput2(input: string): [number, number][] {
         const comma = input.indexOf(",", i);
         if (comma === -1) break;
 
-        const num_1 = +input.slice(i, comma);
-        if (isNaN(num_1) || num_1 > 999 || num_1 < 0) continue;
+        const num1 = +input.slice(i, comma);
+        if (isNaN(num1) || num1 > 999 || num1 < 0) continue;
 
         i = comma + 1;
 
         const close = input.indexOf(")", i);
         if (close === -1) break;
 
-        const num_2 = +input.slice(i, close);
-        if (isNaN(num_2) || num_2 > 999 || num_2 < 0) continue;
+        const num2 = +input.slice(i, close);
+        if (isNaN(num2) || num2 > 999 || num2 < 0) continue;
 
-        instructions.push([num_1, num_2]);
+        sum += num1 * num2;
 
         i = close + 1;
     }
 
-    return instructions;
+    return sum;
 }
 
 if (import.meta.main) {
     const input = await Deno.readTextFile("./days/inputs/03.txt");
     
-    const instructions1 = parseInput(input);
-    console.log("Answer 1:", performInstructions(instructions1));
-
-    const instructions2 = parseInput2(input);
-    console.log("Answer 2:", performInstructions(instructions2));
+    console.log("Answer 1:", evalInput1(input));
+    console.log("Answer 2:", evalInput2(input));
 }
