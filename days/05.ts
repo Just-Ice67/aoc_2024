@@ -1,76 +1,104 @@
-export type Update = number[];
-export type Updates = Update[];
+export class Update {
+    pageNumbers: number[];
 
-export type Rules = {
-    [key: number]: number[];
+    constructor(...pageNumbers: number[]) {
+        this.pageNumbers = pageNumbers;
+    }
+
+    static fromInput(input: string): Update {
+        return new Update(...input.trim().split(",").map((num) => +num));
+    }
+
+    valid(rules: Rules): boolean {
+        for (let i = 0; i < this.pageNumbers.length; i++) {
+            const page = this.pageNumbers[i];
+            const pageRules = rules[page];
+    
+            if (pageRules) {
+                for (const mustBeforePage of pageRules) {
+                    const mustBeforePageIndex = this.pageNumbers.indexOf(mustBeforePage);
+    
+                    if (mustBeforePageIndex !== -1 && mustBeforePageIndex < i) return false;
+                }
+            }
+        }
+    
+        return true;
+    }
+
+    invalid(rules: Rules): boolean { return !this.valid(rules); }
+
+    sort(rules: Rules): Update {
+        this.pageNumbers.sort((a, b) => {
+            if (a in rules && rules[a].includes(b)) return -1;
+            else if (a === b) return 0;
+            else return 1;
+        });
+
+        return this;
+    }
 }
 
-export function parseInput(input: string): [Updates, Rules] {
-    function parseUpdates(input: string): Updates {
-        return input.trim().split("\n").map((line) => line.trim().split(",").map((num) => +num));
+export class Rules {
+    [key: number]: number[];
+
+    constructor(obj?: { [key: number]: number[] }) {
+        if (obj === undefined) return;
+
+        Object.assign(this, obj);
     }
-    
-    function parseRules(input: string): Rules {
-        const rules = {} as Rules;
+
+    static fromInput(input: string): Rules {
+        const rules = new Rules();
     
         for (const line of input.trim().split("\n")) {
-            const [num_1, num_2] = line.trim().split("|").map((num) => +num);
+            const [num, mustBefore] = line.trim().split("|").map((num) => +num);
     
-            num_1 in rules ? rules[num_1].push(num_2) : rules[num_1] = [num_2];
+            rules.addRule(num, mustBefore);
         }
     
         return rules;
     }
 
-    const [rules, updates] = input.trim().split("\n\n");
-
-    return [parseUpdates(updates), parseRules(rules)];
+    addRule(num: number, ...mustBefore: number[]) {
+        num in this ? this[num].push(...mustBefore) : this[num] = mustBefore;
+    }
 }
 
-export function validUpdate(update: Update, rules: Rules): boolean {
-    for (let i = 0; i < update.length; i++) {
-        const page = update[i];
-        const updateRules = rules[page];
-
-        if (updateRules) {
-            for (const afterPage of updateRules) {
-                const afterPageIndex = update.indexOf(afterPage);
-
-                if (afterPageIndex !== -1 && afterPageIndex < i) return false;
-            }
-        }
+export function parseInput(input: string): [Update[], Rules] {
+    function parseUpdates(input: string): Update[] {
+        return input.trim().split("\n").map((line) => Update.fromInput(line));
     }
 
-    return true;
+    const [rules, updates] = input.trim().split("\n\n");
+
+    return [parseUpdates(updates), Rules.fromInput(rules)];
 }
 
-export function validUpdates(updates: Updates, rules: Rules): Updates {
-    return updates.filter((update) => validUpdate(update, rules));
+export function splitUpdates(updates: Update[], rules: Rules): [Update[], Update[]] {
+    const valid = [];
+    const invalid = [];
+
+    for (const update of updates) {
+        if (update.valid(rules)) valid.push(update);
+        else invalid.push(update);
+    }
+
+    return [valid, invalid];
 }
 
-export function updatesMiddlePageSum(updates: Updates): number {
-    return updates.reduce((sum, update) => sum + update[Math.floor(update.length / 2)], 0);
+export function sortUpdates(updates: Update[], rules: Rules): Update[] {
+    return updates.map((update) => update.sort(rules));
 }
 
-export function invalidUpdates(updates: Updates, rules: Rules): Updates {
-    return updates.filter((update) => !validUpdate(update, rules));
-}
-
-export function sortInvalidUpdate(update: Update, rules: Rules): Update {
-    return update.sort((a, b) => {
-        if (a in rules && rules[a].includes(b)) return -1;
-        else if (a === b) return 0;
-        else return 1;
-    });
-}
-
-export function sortInvalidUpdates(updates: Updates, rules: Rules): Updates {
-    return updates.map((update) => sortInvalidUpdate(update, rules));
+export function updatesMiddlePageSum(updates: Update[]): number {
+    return updates.reduce((sum, update) => sum + update.pageNumbers[Math.floor(update.pageNumbers.length / 2)], 0);
 }
 
 if (import.meta.main) {
     const [updates, rules] = parseInput(await Deno.readTextFile("./days/inputs/05.txt"));
+    const [validUpdates, invalidUpdates] = splitUpdates(updates, rules);
 
-    console.log("Answer 1:", updatesMiddlePageSum(validUpdates(updates, rules)));
-    console.log("Answer 2:", updatesMiddlePageSum(sortInvalidUpdates(invalidUpdates(updates, rules), rules)));
+    console.log("Answer 1:", updatesMiddlePageSum(validUpdates));
+    console.log("Answer 2:", updatesMiddlePageSum(sortUpdates(invalidUpdates, rules)));
 }

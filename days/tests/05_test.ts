@@ -1,5 +1,5 @@
 import { assertEquals } from "@std/assert";
-import { parseInput, validUpdates, updatesMiddlePageSum, invalidUpdates, sortInvalidUpdates } from "../05.ts";
+import { Update, Rules, parseInput, splitUpdates, sortUpdates, updatesMiddlePageSum } from "../05.ts";
 
 Deno.test(function day05Test() {
     const input = `
@@ -40,47 +40,44 @@ Deno.test(function day05Test() {
         rules[key].sort();
     }
 
-    assertEquals(rules, {
+    assertEquals(rules, new Rules({
         29: [13],
         47: [13, 29, 53, 61],
         53: [13, 29],
         61: [13, 29, 53],
         75: [13, 29, 47, 53, 61],
         97: [13, 29, 47, 53, 61, 75],
-    });
+    }));
 
     assertEquals(updates, [
-        [75, 47, 61, 53, 29],
-        [97, 61, 53, 29, 13],
-        [75, 29, 13],
-        [75, 97, 47, 61, 53],
-        [61, 13, 29],
-        [97, 13, 75, 29, 47],
+        new Update(75, 47, 61, 53, 29),
+        new Update(97, 61, 53, 29, 13),
+        new Update(75, 29, 13),
+        new Update(75, 97, 47, 61, 53),
+        new Update(61, 13, 29),
+        new Update(97, 13, 75, 29, 47),
     ]);
 
-    const valid = validUpdates(updates, rules);
+    const [validUpdates, invalidUpdates] = splitUpdates(updates, rules);
 
-    assertEquals(valid, [
-        [75, 47, 61, 53, 29],
-        [97, 61, 53, 29, 13],
-        [75, 29, 13],
+    assertEquals(validUpdates, [
+        new Update(75, 47, 61, 53, 29),
+        new Update(97, 61, 53, 29, 13),
+        new Update(75, 29, 13),
     ]);
 
-    assertEquals(updatesMiddlePageSum(valid), 143);
-
-    const invalid = invalidUpdates(updates, rules);
-
-    assertEquals(invalid, [
-        [75, 97, 47, 61, 53],
-        [61, 13, 29],
-        [97, 13, 75, 29, 47],
+    assertEquals(invalidUpdates, [
+        new Update(75, 97, 47, 61, 53),
+        new Update(61, 13, 29),
+        new Update(97, 13, 75, 29, 47),
     ]);
-
-    assertEquals(sortInvalidUpdates(invalid, rules), [
-        [97, 75, 47, 61, 53],
-        [61, 29, 13],
-        [97, 75, 47, 29, 13],
+    
+    assertEquals(sortUpdates(invalidUpdates, rules), [
+        new Update(97, 75, 47, 61, 53),
+        new Update(61, 29, 13),
+        new Update(97, 75, 47, 29, 13),
     ]);
-
-    assertEquals(updatesMiddlePageSum(invalid), 123);
+    
+    assertEquals(updatesMiddlePageSum(validUpdates), 143);
+    assertEquals(updatesMiddlePageSum(invalidUpdates), 123);
 });
