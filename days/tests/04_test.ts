@@ -1,5 +1,5 @@
 import { assertEquals } from "@std/assert";
-import { parseInput, findWord, findWordX } from "../04.ts";
+import { WordSearch } from "../04.ts";
 
 Deno.test(function day04Test() {
     const input = `
@@ -15,8 +15,8 @@ Deno.test(function day04Test() {
         MXMXAXMASX
     `;
 
-    const wordSearch = parseInput(input);
+    const wordSearch = new WordSearch(input);
 
-    assertEquals(findWord(wordSearch, "XMAS"), 18);
-    assertEquals(findWordX(wordSearch, "MAS"), 9);
+    assertEquals(wordSearch.findWord("XMAS"), 18);
+    assertEquals(wordSearch.findWordX("MAS"), 9);
 });
