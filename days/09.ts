@@ -1,44 +1,50 @@
-export type Blocks = string[];
+export class DiskBlocks {
+    static readonly EMPTY = ".";
 
-export function parseInput(input: string): Blocks {
-    return input.trim().split("").flatMap(
-        (char, i) => {
-            if (i % 2 === 1) return ".".repeat(+char).split("");
-            else return `${i / 2} `.repeat(+char).trim().split(" ");
-        }
-    );
-}
+    blocks: string[];
 
-export function sortBlocks(blocks: Blocks): Blocks {
-    for (let i = blocks.length - 1; i >= 0; i--) {
-        if (blocks[i] !== ".") {
-            const empty = blocks.indexOf(".");
-
-            if (empty === -1 || empty > i) continue;
-            
-            blocks[empty] = blocks[i];
-            blocks[i] = ".";
-        }
+    constructor(blocks: string[]) {
+        this.blocks = blocks;
     }
 
-    return blocks;
-}
+    static fromInput(input: string): DiskBlocks {
+        return new DiskBlocks(input.trim().split("").flatMap(
+            (blockSize, i) => {
+                if (i % 2 === 0) {
+                    return Array(+blockSize).fill(`${i / 2}`);
+                } else {
+                    return Array(+blockSize).fill(DiskBlocks.EMPTY);
+                }
+            }
+        ));
+    }
 
-export function calculateChecksum(blocks: Blocks): number {
-    return blocks.reduce(
-        (acc, block, i) => {
-            if (block === ".") return acc;
-            else return acc += i * +block;
-        }, 0
-    );
-}
+    clone(): DiskBlocks {
+        return new DiskBlocks([...this.blocks]);
+    }
 
-export function moveBlocks(blocks: Blocks): Blocks {
-    for (let i = blocks.length - 1; i >= 0; i--) {
-        if (blocks[i] !== ".") {
+    sort(): DiskBlocks {
+        for (let i = this.blocks.length - 1; i >= 0; i--) {
+            if (this.blocks[i] === DiskBlocks.EMPTY) continue;
+            
+            const nextEmpty = this.blocks.indexOf(DiskBlocks.EMPTY);
+
+            if (nextEmpty === -1 || nextEmpty > i) continue;
+            
+            this.blocks[nextEmpty] = this.blocks[i];
+            this.blocks[i] = DiskBlocks.EMPTY;
+        }
+
+        return this;
+    }
+
+    move(): DiskBlocks {
+        for (let i = this.blocks.length - 1; i >= 0; i--) {
+            if (this.blocks[i] === DiskBlocks.EMPTY) continue;
+
             const blockEnd = i;
 
-            while (i !== 0 && blocks[i - 1] === blocks[blockEnd]) i--;
+            while (i !== 0 && this.blocks[i - 1] === this.blocks[blockEnd]) i--;
 
             const blockLength = blockEnd - i + 1;
             
@@ -47,13 +53,13 @@ export function moveBlocks(blocks: Blocks): Blocks {
             let emptyLength = 0;
 
             while (true) {
-                empty = blocks.indexOf(".", emptySearchStart);
+                empty = this.blocks.indexOf(DiskBlocks.EMPTY, emptySearchStart);
     
                 if (empty === -1 || empty > i) break;
     
                 emptyLength = 1;
 
-                while (blocks[empty + emptyLength] === blocks[empty]) emptyLength++;
+                while (this.blocks[empty + emptyLength] === DiskBlocks.EMPTY) emptyLength++;
 
                 if (emptyLength < blockLength) emptySearchStart = empty + emptyLength;
                 else break;
@@ -61,22 +67,31 @@ export function moveBlocks(blocks: Blocks): Blocks {
 
             if (empty === -1 || emptyLength < blockLength) continue;
             
-            blocks.splice(empty, blockLength, ...blocks.slice(i, blockEnd + 1));
-            blocks.splice(i, blockLength, ...".".repeat(blockLength).split(""));
+            this.blocks.splice(empty, blockLength, ...this.blocks.slice(i, blockEnd + 1));
+            this.blocks.splice(i, blockLength, ...Array(blockLength).fill(DiskBlocks.EMPTY));
         }
+
+        return this;
     }
 
-    return blocks;
+    checksum(): number {
+        return this.blocks.reduce(
+            (checksum, block, i) => {
+                if (block === ".") return checksum;
+                else return checksum += i * +block;
+            }, 0
+        );
+    }
 }
 
 if (import.meta.main) {
-    const blocks = parseInput(await Deno.readTextFile("./days/inputs/09.txt"));
+    const blocks = DiskBlocks.fromInput(await Deno.readTextFile("./days/inputs/09.txt"));
 
-    const fragmented = sortBlocks([...blocks]);
+    const fragmented = blocks.clone().sort();
 
-    console.log("Answer 1:", calculateChecksum(fragmented));
+    console.log("Answer 1:", fragmented.checksum());
 
-    moveBlocks(blocks);
+    blocks.move();
 
-    console.log("Answer 2:", calculateChecksum(blocks));
+    console.log("Answer 2:", blocks.checksum());
 }
