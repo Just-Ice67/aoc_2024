@@ -1,5 +1,5 @@
 import { assertEquals } from "@std/assert";
-import { parseInput, getPath, countUniquePathPositions, findLoops } from "../06.ts";
+import { Lab, GuardPath, findLoops } from "../06.ts";
 
 Deno.test(function day06Test() {
     const input = `
@@ -15,9 +15,9 @@ Deno.test(function day06Test() {
         ......#...
     `;
 
-    const map = parseInput(input);
+    const lab = new Lab(input);
 
-    assertEquals(map, [
+    assertEquals(lab.map, [
         [".", ".", ".", ".", "#", ".", ".", ".", ".", "."], 
         [".", ".", ".", ".", ".", ".", ".", ".", ".", "#"], 
         [".", ".", ".", ".", ".", ".", ".", ".", ".", "."], 
@@ -30,9 +30,9 @@ Deno.test(function day06Test() {
         [".", ".", ".", ".", ".", ".", "#", ".", ".", "."],
     ]);
 
-    const path = getPath(map)[0];
+    const path = new GuardPath(lab);
 
-    assertEquals(countUniquePathPositions(path), 41);
+    assertEquals(path.uniquePositions().length, 41);
 
-    assertEquals(findLoops(map), 6);
+    assertEquals(findLoops(lab), 6);
 });

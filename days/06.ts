@@ -1,94 +1,162 @@
-export type Map = string[][];
-export type Position = [number, number];
-export type Path = Position[];
+export class Position {
+    x: number;
+    y: number;
 
-export const START_DIR = [0, -1] as [number, number];
-export const START = "^";
-export const EMPTY = ".";
-export const WALL = "#";
-
-export function parseInput(input: string): Map {
-    return input.trim().split("\n").map((line) => line.trim().split(""));
-}
-
-export function findStart(map: Map): Position {
-    for (let y = 0; y < map.length; y++) {
-        for (let x = 0; x < map[y].length; x++) {
-            if (map[y][x] === START) return [x, y];
-        }
+    constructor(x: number, y: number) {
+        this.x = x;
+        this.y = y;
     }
 
-    return [-1, -1];
+    static fromString(from: string): Position {
+        const [x, y] = from.split(",").map((num) => +num);
+
+        return new Position(x, y);
+    }
+
+    clone(): Position {
+        return new Position(this.x, this.y);
+    }
+
+    toString(): string {
+        return `${this.x},${this.y}`
+    }
+
+    equals(other: Position): boolean {
+        return this.x === other.x && this.y === other.y;
+    }
 }
 
-export function getPath(map: Map): [Path, boolean] {
-    let dir = START_DIR;
-    let [x, y] = findStart(map);
+export class Lab {
+    static readonly START = "^";
+    static readonly EMPTY = ".";
+    static readonly WALL = "#";
+
+    map: string[][];
+
+    constructor(input: string) {
+        this.map = input.trim().split("\n").map((line) => line.trim().split(""));
+    }
+
+    start(): Position {
+        for (let y = 0; y < this.map.length; y++) {
+            for (let x = 0; x < this.map[y].length; x++) {
+                if (this.map[y][x] === Lab.START) return new Position(x, y);
+            }
+        }
     
-    const path = [[x, y]] as Path;
-    const walls = {} as { [pos: string]: [number, number] };
-    let looping = false;
+        return new Position(-1, -1);
+    }
+}
 
-    while (true) {
-        const [nextX, nextY] = [x + dir[0], y + dir[1]];
+export class GuardDirection {
+    static readonly UP = new GuardDirection(0, -1);
+    static readonly DOWN = new GuardDirection(0, 1);
+    static readonly LEFT = new GuardDirection(-1, 0);
+    static readonly RIGHT = new GuardDirection(1, 0);
 
-        if (nextY < 0 || nextY >= map.length || nextX < 0 || nextX >= map[nextY].length) break;
+    private constructor(x: number, y: number) {
+        this._x = x;
+        this._y = y;
+    }
 
-        if (map[nextY][nextX] === WALL) {
-            const key = `${nextX},${nextY}`;
+    static start(): GuardDirection {
+        return GuardDirection.UP;
+    }
 
-            if (key in walls && walls[key][0] === dir[0] && walls[key][1] === dir[1]) {
-                looping = true;
-                break;
-            } else walls[key] = dir;
+    equals(other: GuardDirection) {
+        return this._x === other._x && this._y === other._y;
+    }
 
-            if (dir[0] === 0 && dir[1] === -1) dir = [1, 0];
-            else if (dir[0] === 1 && dir[1] === 0) dir = [0, 1];
-            else if (dir[0] === 0 && dir[1] === 1) dir = [-1, 0];
-            else if (dir[0] === -1 && dir[1] === 0) dir = [0, -1];
-        } else {
-            x = nextX;
-            y = nextY;
-            
-            path.push([x, y]);
+    next(): GuardDirection {
+        if (this.equals(GuardDirection.UP)) return GuardDirection.RIGHT;
+        else if (this.equals(GuardDirection.DOWN)) return GuardDirection.LEFT;
+        else if (this.equals(GuardDirection.LEFT)) return GuardDirection.UP;
+        else if (this.equals(GuardDirection.RIGHT)) return GuardDirection.DOWN;
+        else return this;
+    }
+
+    shift(position: Position): Position {
+        position.x += this._x;
+        position.y += this._y;
+
+        return position;
+    }
+
+    private _x: number;
+    private _y: number;
+}
+
+export class GuardPath {
+    constructor(lab: Lab) {
+        this._looping = false;
+
+        let currDir = GuardDirection.start();
+        let currPos = lab.start();
+        
+        this._positions = [currPos];
+
+        const walls: Map<string, GuardDirection> = new Map();
+
+        while (true) {
+            const nextPos = currDir.shift(currPos.clone());
+    
+            if (
+                nextPos.y < 0 || nextPos.y >= lab.map.length ||
+                nextPos.x < 0 || nextPos.x >= lab.map[nextPos.y].length
+            ) break;
+    
+            if (lab.map[nextPos.y][nextPos.x] === Lab.WALL) {
+                const key = nextPos.toString();
+    
+                if (walls.has(key) && walls.get(key)!.equals(currDir)) {
+                    this._looping = true;
+                    break;
+                } else walls.set(key, currDir);
+    
+                currDir = currDir.next();
+            } else {
+                currPos = nextPos;
+                
+                this._positions.push(currPos);
+            }
         }
     }
 
-    return [path, looping];
+    get looping(): boolean { return this._looping; }
+
+    uniquePositions(): Position[] {
+        const unique = new Set(this._positions.map((pos) => pos.toString()));
+
+        return Array.from(unique).map((pos) => Position.fromString(pos));
+    }
+    
+    private _positions: Position[];
+    private _looping: boolean;
 }
 
-export function removePathDuplicates(path: Path): Path {
-    const unique = new Set(path.map((pos) => pos.join(",")))
-    return Array.from(unique).map((pos) => pos.split(",").map((num) => +num)) as Path;
-}
-
-export function countUniquePathPositions(path: Path): number {
-    return removePathDuplicates(path).length;
-}
-
-export function findLoops(map: Map) {
+export function findLoops(lab: Lab) {
     let count = 0;
 
-    const path = removePathDuplicates(getPath(map)[0]);
+    const pathPositions = new GuardPath(lab).uniquePositions();
 
-    for (const [x, y] of path) {
-        if (map[y][x] !== EMPTY) continue;
+    for (const pos of pathPositions) {
+        if (lab.map[pos.y][pos.x] !== Lab.EMPTY) continue;
 
-        map[y][x] = WALL;
+        lab.map[pos.y][pos.x] = Lab.WALL;
 
-        if (getPath(map)[1]) count++;
+        if (new GuardPath(lab).looping) count++;
 
-        map[y][x] = EMPTY;
+        lab.map[pos.y][pos.x] = Lab.EMPTY;
     }
 
     return count;
 }
 
 if (import.meta.main) {
-    const map = parseInput(await Deno.readTextFile("./days/inputs/06.txt"));
+    const lab = new Lab(await Deno.readTextFile("./days/inputs/06.txt"));
 
-    const path = getPath(map)[0];
+    const path = new GuardPath(lab);
 
-    console.log("Answer 1:", countUniquePathPositions(path));
-    console.log("Answer 2:", findLoops(map));
+    console.log("Answer 1:", path.uniquePositions().length);
+    console.log("Answer 2:", findLoops(lab));
 }
