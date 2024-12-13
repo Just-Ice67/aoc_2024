@@ -1,5 +1,5 @@
 import { assertEquals } from "@std/assert";
-import { parseInput, getAntennaMap, getAntinodeMap, countUniqueAntinodePositions } from "../08.ts";
+import { RoofMap } from "../08.ts";
 
 Deno.test(function day08Test() {
     const input = `
@@ -17,39 +17,8 @@ Deno.test(function day08Test() {
         ............
     `;
 
-    const map = parseInput(input);
+    const map = RoofMap.fromInput(input);
 
-    assertEquals(map, [
-        "............",
-        "........0...",
-        ".....0......",
-        ".......0....",
-        "....0.......",
-        "......A.....",
-        "............",
-        "............",
-        "........A...",
-        ".........A..",
-        "............",
-        "............",
-    ]);
-
-    const antennaMap = getAntennaMap(map);
-
-    assertEquals(antennaMap, {
-        "0": [
-            [8, 1],
-            [5, 2],
-            [7, 3],
-            [4, 4],
-        ],
-        "A": [
-            [6, 5],
-            [8, 8],
-            [9, 9],
-        ]
-    });
-
-    assertEquals(countUniqueAntinodePositions(getAntinodeMap(map, false)), 14);
-    assertEquals(countUniqueAntinodePositions(getAntinodeMap(map, true)), 34);
+    assertEquals(map.antinodes(false).uniquePositions().length, 14);
+    assertEquals(map.antinodes(true).uniquePositions().length, 34);
 });

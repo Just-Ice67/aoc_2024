@@ -1,84 +1,147 @@
-export type Map = string[];
-export type Position = [number, number];
-export type FrequencyMap = { [frequency: string]: Position[] }
+export class Position {
+    x: number;
+    y: number;
 
-export const EMPTY = ".";
-
-export function parseInput(input: string): Map {
-    return input.trim().split("\n").map((line) => line.trim());
-}
-
-export function getAntennaMap(map: Map): FrequencyMap {
-    const antennaMap = {} as FrequencyMap;
-
-    for (let y = 0; y < map.length; y++) {
-        for (let x = 0; x < map[y].length; x++) {
-            const frequency = map[y][x];
-
-            if (frequency === EMPTY) continue;
-
-            frequency in antennaMap ? antennaMap[frequency].push([x, y]) : antennaMap[frequency] = [[x, y]];
-        }
+    constructor(x: number, y: number) {
+        this.x = x;
+        this.y = y;
     }
 
-    return antennaMap;
+    static fromString(from: string): Position {
+        const [x, y] = from.split(",").map((num) => +num);
+
+        return new Position(x, y);
+    }
+
+    toString(): string {
+        return `${this.x},${this.y}`;
+    }
+
+    equals(other: Position) {
+        return this.x === other.x && this.y === other.y;
+    }
+
+    add(other: Position): Position {
+        return new Position(this.x + other.x, this.y + other.y);
+    }
+
+    sub(other: Position): Position {
+        return new Position(this.x - other.x, this.y - other.y);
+    }
+
+    scale(scale: number): Position {
+        return new Position(this.x * scale, this.y * scale);
+    }
 }
 
-export function getAntinodeMap(map: Map, resonantHarmonics: boolean): FrequencyMap {
-    const antinodeMap = {} as FrequencyMap;
+export class FrequencyMap {
+    frequencies: Map<string, Position[]>;
 
-    const antennaMap = getAntennaMap(map);
+    constructor(...frequencies: [string, Position[]][]) {
+        this.frequencies = new Map(frequencies);
+    }
 
-    for (const [frequency, positions] of Object.entries(antennaMap)) {
-        for (const pos1 of positions) {
-            for (const pos2 of positions) {
-                if (pos1[0] === pos2[0] && pos1[1] === pos2[1]) continue;
+    uniquePositions(): Position[] {
+        const unique = this.frequencies.values().reduce(
+            (set, positions) => {
+                return set.union(new Set(positions.map(
+                    (pos) => pos.toString()
+                )));
+            }, new Set<string>()
+        );
 
-                if (resonantHarmonics) {
-                    const run = pos2[0] - pos1[0];
-                    const rise = pos2[1] - pos1[1];
+        return Array.from(unique).map((pos) => Position.fromString(pos));
+    }
+}
 
-                    let x = pos1[0] + run;
-                    let y = pos1[1] + rise;
+export class RoofMap {
+    static readonly EMPTY = ".";
 
-                    while(y >= 0 && y < map.length && x >= 0 && x < map[y].length) {
-                        frequency in antinodeMap ? antinodeMap[frequency].push([x, y]) : antinodeMap[frequency] = [[x, y]];
+    map: string[][];
 
-                        x += run;
-                        y += rise;
-                    }
-                }
-                else {
-                    const run = (pos2[0] - pos1[0]) * 2;
-                    const rise = (pos2[1] - pos1[1]) * 2;
-                    
-                    const x = pos1[0] + run;
-                    const y = pos1[1] + rise;
-                    
-                    if (y < 0 || y >= map.length || x < 0 || x >= map[y].length) continue;
-                    
-                    frequency in antinodeMap ? antinodeMap[frequency].push([x, y]) : antinodeMap[frequency] = [[x, y]];
+    constructor(...map: string[][]) {
+        this.map = map;
+    }
+
+    static fromInput(input: string): RoofMap {
+        return new RoofMap(...input.trim().split("\n").map((line) => line.trim().split("")));
+    }
+
+    antennas(): FrequencyMap {
+        const antennaMap = new FrequencyMap();
+
+        for (let y = 0; y < this.map.length; y++) {
+            for (let x = 0; x < this.map[y].length; x++) {
+                const frequency = this.map[y][x];
+    
+                if (frequency === RoofMap.EMPTY) continue;
+    
+                if (antennaMap.frequencies.has(frequency)) {
+                    antennaMap.frequencies.get(frequency)!.push(new Position(x, y));
+                } else {
+                    antennaMap.frequencies.set(frequency, [new Position(x, y)]);
                 }
             }
         }
+    
+        return antennaMap;
     }
 
-    return antinodeMap;
-}
+    antinodes(resonantHarmonics: boolean): FrequencyMap {
+        const antinodeMap = new FrequencyMap();
 
-export function countUniqueAntinodePositions(antinodeMap: FrequencyMap): number {
-    return Object.values(antinodeMap).reduce(
-        (set, positions) => {
-            return set.union(new Set(positions.map(
-                (pos) => pos.join(",")
-            )));
-        }, new Set()
-    ).size;
+        const antennaMap = this.antennas();
+
+        for (const [frequency, positions] of antennaMap.frequencies.entries()) {
+            for (const pos1 of positions) {
+                for (const pos2 of positions) {
+                    if (pos1.equals(pos2)) continue;
+    
+                    if (resonantHarmonics) {
+                        const slope = pos2.sub(pos1);
+    
+                        let currPos = pos1.add(slope);
+    
+                        while(
+                            currPos.y >= 0 && currPos.y < this.map.length && 
+                            currPos.x >= 0 && currPos.x < this.map[currPos.y].length
+                        ) {
+                            if (antinodeMap.frequencies.has(frequency)) {
+                                antinodeMap.frequencies.get(frequency)!.push(currPos);
+                            } else {
+                                antinodeMap.frequencies.set(frequency, [currPos]);
+                            }
+    
+                            currPos = currPos.add(slope);
+                        }
+                    }
+                    else {
+                        const slope = pos2.sub(pos1).scale(2);
+                        
+                        const pos = pos1.add(slope);
+                        
+                        if (
+                            pos.y < 0 || pos.y >= this.map.length ||
+                            pos.x < 0 || pos.x >= this.map[pos.y].length
+                        ) continue;
+                        
+                        if (antinodeMap.frequencies.has(frequency)) {
+                            antinodeMap.frequencies.get(frequency)!.push(pos);
+                        } else {
+                            antinodeMap.frequencies.set(frequency, [pos]);
+                        }
+                    }
+                }
+            }
+        }
+    
+        return antinodeMap;
+    }
 }
 
 if (import.meta.main) {
-    const map = parseInput(await Deno.readTextFile("./days/inputs/08.txt"));
+    const map = RoofMap.fromInput(await Deno.readTextFile("./days/inputs/08.txt"));
 
-    console.log("Answer 1:", countUniqueAntinodePositions(getAntinodeMap(map, false)));
-    console.log("Answer 2:", countUniqueAntinodePositions(getAntinodeMap(map, true)));
+    console.log("Answer 1:", map.antinodes(false).uniquePositions().length);
+    console.log("Answer 2:", map.antinodes(true).uniquePositions().length);
 }
