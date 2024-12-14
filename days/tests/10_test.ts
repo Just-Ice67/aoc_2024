@@ -1,5 +1,5 @@
 import { assertEquals } from "@std/assert";
-import { parseInput, analyzeTrailheads, countPeaks } from "../10.ts";
+import { TopographicalMap } from "../10.ts";
 
 Deno.test(function day10Test() {
     const input = `
@@ -13,9 +13,9 @@ Deno.test(function day10Test() {
         10456732
     `;
 
-    const map = parseInput(input);
+    const map = TopographicalMap.fromInput(input);
 
-    assertEquals(map, [
+    assertEquals(map, new TopographicalMap([
         [8, 9, 0, 1, 0, 1, 2, 3],
         [7, 8, 1, 2, 1, 8, 7, 4],
         [8, 7, 4, 3, 0, 9, 6, 5],
@@ -24,10 +24,8 @@ Deno.test(function day10Test() {
         [3, 2, 0, 1, 9, 0, 1, 2],
         [0, 1, 3, 2, 9, 8, 0, 1],
         [1, 0, 4, 5, 6, 7, 3, 2],
-    ]);
+    ]));
 
-    const trailheads = analyzeTrailheads(map);
-
-    assertEquals(countPeaks(trailheads, true), 36);
-    assertEquals(countPeaks(trailheads, false), 81);
+    assertEquals(map.uniquePeaks(), 36);
+    assertEquals(map.peaks(), 81);
 });
