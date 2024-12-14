@@ -31,6 +31,7 @@ export class TopographicalMap {
 
     setMap(map: number[][]) {
         this._map = map;
+        this._trailheads = [];
         this._analyzeMap();
     }
 
