@@ -49,7 +49,7 @@ export class ClawMachine {
 
         Now we can solve the bottom equation for a:
         y₁ = y₂a + y₃b; initial equation
-        y₁ = y₂a + y₃((x₁ - x₂a) ÷ x₃); substitute (x₁ - x₂a) ÷ x₃ for b
+        y₁ = y₂a + y₃((x₁ - x₂a) ÷ x₃); substitute b for (x₁ - x₂a) ÷ x₃
         y₁ = y₂a + y₃(x₁ ÷ x₃ - x₂a ÷ x₃); distribute (x₁ - x₂a) ÷ x₃
         y₁ = y₂a + y₃(x₁ ÷ x₃) - y₃(x₂a ÷ x₃); distribute y₃(x₁ ÷ x₃ - x₂a ÷ x₃)
         y₁ - y₃(x₁ ÷ x₃) = y₂a - y₃(x₂a ÷ x₃); subtract y₃(x₁ ÷ x₃) from both sides
