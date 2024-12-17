@@ -157,12 +157,6 @@ if (import.meta.main) {
 
     const output = "./days/outputs/14.txt";
 
-    try {
-        await Deno.remove(output);
-    } catch (e) {
-        if (!(e instanceof Deno.errors.NotFound)) throw e;
-    }
-
     const outFile = await Deno.create(output);
     const textEncoder = new TextEncoder();
 
