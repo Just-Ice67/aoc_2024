@@ -130,15 +130,18 @@ export class ChronospatialComputer {
         }
     }
 
-    evalInstruction(instruction: Instruction, rawOperand: number): number {
+    evalOperand(instruction: Instruction, operand: number): number {
+        switch (instruction.operandType()) {
+            case OperandType.Literal: return operand;
+            case OperandType.Combo: return this.evalComboOperand(operand);
+            case OperandType.Ignored: return NaN;
+        }
+    }
+
+    evalInstruction(instruction: Instruction, operand: number): number {
         this._programCounter += 2;
 
-        let operand;
-        switch (instruction.operandType()) {
-            case OperandType.Literal: operand = rawOperand; break;
-            case OperandType.Combo: operand = this.evalComboOperand(rawOperand); break;
-            case OperandType.Ignored: operand = NaN; break;
-        }
+        operand = this.evalOperand(instruction, operand);
 
         switch (instruction.opcode) {
             case Instruction.adv.opcode: {
