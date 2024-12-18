@@ -104,7 +104,7 @@ export class ChronospatialComputer {
     get programCounter(): number { return this._programCounter; }
     get output(): ReadonlyArray<ThreeBit> { return this._output; }
 
-    runProgram(program: Program, stopCondition: (computer: ChronospatialComputer) => boolean = () => false): ReadonlyArray<ThreeBit> {
+    runProgram(program: Program): ReadonlyArray<ThreeBit> {
         this.reset(program.regA, program.regB, program.regC);
 
         while (this._programCounter < program.memory.length) {
@@ -112,8 +112,6 @@ export class ChronospatialComputer {
             const rawOperand = program.memory[this._programCounter + 1];
 
             this.evalInstruction(instruction, rawOperand);
-
-            if (stopCondition(this)) break;
         }
 
         return this.output;
