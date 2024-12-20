@@ -1,11 +1,11 @@
-export class Direction {
-    static readonly NORTH: Readonly<Direction> = new Direction(0, -1);
-    static readonly SOUTH: Readonly<Direction> = new Direction(0, 1);
-    static readonly WEST: Readonly<Direction> = new Direction(-1, 0);
-    static readonly EAST: Readonly<Direction> = new Direction(1, 0);
-    static readonly NONE: Readonly<Direction> = new Direction(0, 0);
+export class Vector {
+    static readonly NORTH: Readonly<Vector> = new Vector(0, -1);
+    static readonly SOUTH: Readonly<Vector> = new Vector(0, 1);
+    static readonly WEST: Readonly<Vector> = new Vector(-1, 0);
+    static readonly EAST: Readonly<Vector> = new Vector(1, 0);
+    static readonly ZERO: Readonly<Vector> = new Vector(0, 0);
 
-    static readonly FOUR_WAYS: ReadonlyArray<Readonly<Direction>> = [Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST];
+    static readonly CARDINAL: ReadonlyArray<Readonly<Vector>> = [Vector.NORTH, Vector.SOUTH, Vector.EAST, Vector.WEST];
 
     x: number;
     y: number;
@@ -15,23 +15,23 @@ export class Direction {
         this.y = y;
     }
 
-    static *distanceAway(distance: number): Generator<Direction> {
+    static *distanceAway(distance: number): Generator<Vector> {
         for (let offset = 0; offset < distance; offset++) {
             const compliment = distance - offset;
-            
-            yield new Direction(offset, compliment);
-            yield new Direction(compliment, -offset);
-            yield new Direction(-offset, -compliment);
-            yield new Direction(-compliment, offset);
+
+            yield new Vector(offset, compliment);
+            yield new Vector(compliment, -offset);
+            yield new Vector(-offset, -compliment);
+            yield new Vector(-compliment, offset);
         }
     }
 
-    equals(other: Direction): boolean {
+    equals(other: Vector): boolean {
         return this.x === other.x && this.y === other.y;
     }
 
-    opposite(): Direction {
-        return new Direction(-this.x, -this.y);
+    opposite(): Vector {
+        return new Vector(-this.x, -this.y);
     }
 }
 
@@ -56,8 +56,8 @@ export class Position {
         return this.x === other.x && this.y === other.y;
     }
 
-    shifted(direction: Direction): Position {
-        return new Position(this.x + direction.x, this.y + direction.y);
+    shifted(vector: Vector): Position {
+        return new Position(this.x + vector.x, this.y + vector.y);
     }
 }
 
@@ -105,26 +105,26 @@ export class RaceTrack {
         return new RaceTrack(input.trim().split("\n").map((line) => line.trim().split("")));
     }
 
-    getPath(): [Position, Direction][] {
+    getPath(): [Position, Vector][] {
         const start = this._findStart();
-        const path: [Position, Direction][] = [[start, Direction.NONE]];
+        const path: [Position, Vector][] = [[start, Vector.ZERO]];
 
         outer: while (true) {
-            const [pos, fromDir] = path.at(-1)!;
+            const [pos, fromVec] = path.at(-1)!;
 
             if (this.map[pos.y][pos.x] === RaceTrack.END) return path;
             
-            const backwards = fromDir.opposite();
+            const backwards = fromVec.opposite();
             
-            for (const direction of Direction.FOUR_WAYS) {
-                if (direction.equals(backwards)) continue;
+            for (const vector of Vector.CARDINAL) {
+                if (vector.equals(backwards)) continue;
 
-                const moved = pos.shifted(direction);
+                const moved = pos.shifted(vector);
 
                 if (moved.y < 0 || moved.y >= this.map.length || moved.x < 0 || moved.x >= this.map[moved.y].length) continue;
                 if (this.map[moved.y][moved.x] === RaceTrack.WALL) continue;
 
-                path.push([moved, direction]);
+                path.push([moved, vector]);
                 continue outer;
             }
 
@@ -138,10 +138,13 @@ export class RaceTrack {
         const originalPath = this.getPath();
 
         for (let cheatDur = 2; cheatDur <= maxPicoseconds; cheatDur++) {
+            const vectorOffsets = [...Vector.distanceAway(cheatDur)];
+
             for (let i = 0; i < originalPath.length - 1; i++) {
                 const pos = originalPath[i][0];
-                for (const direction of Direction.distanceAway(cheatDur)) {
-                    const moved = pos.shifted(direction);
+
+                for (const vector of vectorOffsets) {
+                    const moved = pos.shifted(vector);
 
                     if (moved.y < 0 || moved.y >= this.map.length || moved.x < 0 || moved.x >= this.map[moved.y].length) continue;
                     if (this.map[moved.y][moved.x] === RaceTrack.WALL) continue;
