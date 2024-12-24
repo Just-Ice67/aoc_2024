@@ -54,11 +54,11 @@ export function part1(network: ComputerNetwork): number {
 
 export function part2(network: ComputerNetwork): string {
     let set;
-    let i = [...network.map.keys()].length
+    let i = [...network.map.keys()].length + 1;
 
     do {
-        set = network.interconnectedSets(i);
         i--;
+        set = network.interconnectedSets(i);
     } while (set.size === 0);
 
     return set.values().next().value!;
