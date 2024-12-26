@@ -22,7 +22,8 @@
     "day_20": "deno run --allow-read=./days/inputs/20.txt ./days/20.ts",
     "day_21": "deno run --allow-read=./days/inputs/21.txt ./days/21.ts",
     "day_22": "deno run --allow-read=./days/inputs/22.txt ./days/22.ts",
-    "day_23": "deno run --allow-read=./days/inputs/23.txt ./days/23.ts"
+    "day_23": "deno run --allow-read=./days/inputs/23.txt ./days/23.ts",
+    "day_24": "deno run --allow-read=./days/inputs/24.txt ./days/24.ts"
   },
   "imports": {
     "@std/assert": "jsr:@std/assert@^1.0.10",
